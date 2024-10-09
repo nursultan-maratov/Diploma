@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
+	"github.com/nursultan-maratov/Diploma.git/internal/handler"
 	"github.com/nursultan-maratov/Diploma.git/internal/postgres"
 	"log"
-	"net/http"
 )
 
 func main() {
@@ -14,11 +14,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Kaput db is not working %v", err)
 	}
+	serviceHandler := handler.NewHandler()
 
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	e.GET("/hello-world", serviceHandler.HelloWorld)
 	e.Logger.Fatal(e.Start(":80"))
-
 }
