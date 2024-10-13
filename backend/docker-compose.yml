@@ -5,7 +5,7 @@ services:
   default_database:
     image: postgres
     ports:
-      - "5050:5432"
+      - "5051:5432"
     shm_size: 128mb
     volumes:
       - type: tmpfs
@@ -19,7 +19,7 @@ services:
   security_database:
     image: postgres
     ports:
-      - "5051:5432"
+      - "5050:5432"
     shm_size: 128mb
     volumes:
       - type: tmpfs

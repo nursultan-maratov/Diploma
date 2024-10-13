@@ -5,18 +5,25 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/nursultan-maratov/Diploma.git/internal/handler"
 	"github.com/nursultan-maratov/Diploma.git/internal/postgres"
+	"github.com/nursultan-maratov/Diploma.git/internal/service"
 	"log"
 )
 
 func main() {
 
-	_, err := postgres.ConnectDefaultDataBase()
+	db, err := postgres.ConnectDefaultDataBase()
 	if err != nil {
 		log.Fatalf("Kaput db is not working %v", err)
 	}
-	serviceHandler := handler.NewHandler()
+	service := service.NewService(db)
+
+	if err != nil {
+		log.Fatalf("Kaput factory is not working %v", err)
+	}
+
+	newHandler := handler.NewHandler(service.GetUserManager())
 
 	e := echo.New()
-	e.GET("/hello-world", serviceHandler.HelloWorld)
+	e.POST("/create-user", newHandler.CreateUsers)
 	e.Logger.Fatal(e.Start(":80"))
 }

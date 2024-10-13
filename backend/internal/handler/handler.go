@@ -2,15 +2,31 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/nursultan-maratov/Diploma.git/internal/manager/user"
+	"github.com/nursultan-maratov/Diploma.git/internal/model"
 	"net/http"
 )
 
 type Handler struct {
+	userManager user.ManagerSDK
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(userManager user.ManagerSDK) *Handler {
+	return &Handler{
+		userManager: userManager,
+	}
 }
-func (h *Handler) HelloWorld(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
+func (h *Handler) CreateUsers(c echo.Context) error {
+	var user model.UserRequest
+	err := c.Bind(&user)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "bad request")
+	}
+
+	id, err := h.userManager.CreateUser(c.Request().Context(), &user)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "bad request")
+	}
+
+	return c.JSON(http.StatusOK, id)
 }

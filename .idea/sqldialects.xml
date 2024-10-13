@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/8ef396b8-67f0-4804-bcf3-fe1fc4526bc9/console.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/internal/postgres/sql/init.sql" dialect="Redshift" />
   </component>
 </project>
