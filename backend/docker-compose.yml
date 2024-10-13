@@ -10,6 +10,7 @@ services:
     volumes:
       - type: tmpfs
         target: /dev/shm
+      - ./internal/postgres/sql:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: postgres
       POSTGRES_NAME: postgres
