@@ -12,6 +12,7 @@ type Service struct {
 
 type ServiceSDK interface {
 	GetUserManager() user.ManagerSDK
+	GetRepository() Repository
 }
 
 func NewService(db *sql.DB) *Service {
@@ -26,4 +27,8 @@ func NewService(db *sql.DB) *Service {
 
 func (s *Service) GetUserManager() user.ManagerSDK {
 	return s.userManager
+}
+
+func (s *Service) GetRepository() *Repository {
+	return s.repository
 }

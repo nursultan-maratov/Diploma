@@ -26,6 +26,7 @@ type userRepo struct {
 
 type UserSDK interface {
 	CreateUser(user *User) (uint, error)
+	GetUser(ID uint) (*User, error)
 }
 
 func NewUserRepo(db *sql.DB) UserSDK {
@@ -34,7 +35,7 @@ func NewUserRepo(db *sql.DB) UserSDK {
 	}
 }
 
-func (u userRepo) CreateUser(user *User) (uint, error) {
+func (u *userRepo) CreateUser(user *User) (uint, error) {
 	var ID uint
 	sqlStatement := fmt.Sprintf(`INSERT INTO users (first_name, last_name, email, password, phone, address, status)
 VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id`,
@@ -46,4 +47,17 @@ VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id`,
 	}
 
 	return ID, nil
+}
+
+func (u *userRepo) GetUser(ID uint) (*User, error) {
+	query := "SELECT * FROM users WHERE id = ?"
+	row := u.db.QueryRow(query, ID)
+
+	user := &User{}
+	err := row.Scan(&user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
