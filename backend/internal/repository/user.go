@@ -1,63 +1,76 @@
 package repository
 
 import (
-	"database/sql"
-	"fmt"
+	"context"
+	"github.com/uptrace/bun"
 	"time"
 )
 
 type User struct {
-	ID        uint       `json:"id"`
+	ID        uint       `json:"id" bun:",pk,autoincrement"`
 	FirstName string     `json:"first_name"`
 	LastName  string     `json:"last_name"`
-	Email     string     `json:"email"`
+	Email     string     `json:"email" bun:",unique"`
 	Password  string     `json:"password"`
 	Phone     string     `json:"phone"`
 	Address   string     `json:"address"`
 	Status    string     `json:"status"`
-	CreatedAt *time.Time `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	CreatedAt *time.Time `json:"created_at" bun:",nullzero,default:current_timestamp"`
+	UpdatedAt *time.Time `json:"updated_at" bun:",nullzero"`
+	DeletedAt *time.Time `json:"deleted_at" bun:",soft_delete,nullzero"`
 }
 
 type userRepo struct {
-	db *sql.DB
+	db *bun.DB
 }
 
 type UserSDK interface {
-	CreateUser(user *User) (uint, error)
-	GetUser(ID uint) (*User, error)
+	CreateUser(ctx context.Context, user *User) (uint, error)
+	GetUser(ctx context.Context, ID uint) (*User, error)
+	UpdateUser(ctx context.Context, user *User) error
+	DeleteUser(ctx context.Context, ID uint) error
+	ListUsers(ctx context.Context) ([]*User, error)
 }
 
-func NewUserRepo(db *sql.DB) UserSDK {
-	return &userRepo{
-		db: db,
-	}
+func NewUserRepo(db *bun.DB) UserSDK {
+	return &userRepo{db: db}
 }
 
-func (u *userRepo) CreateUser(user *User) (uint, error) {
-	var ID uint
-	sqlStatement := fmt.Sprintf(`INSERT INTO users (first_name, last_name, email, password, phone, address, status)
-VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id`,
-		user.FirstName, user.LastName, user.Email, user.Password, user.Phone, user.Address, user.Status)
+func (u *userRepo) CreateUser(ctx context.Context, user *User) (uint, error) {
+	now := time.Now()
+	user.CreatedAt = &now
 
-	err := u.db.QueryRow(sqlStatement).Scan(&ID)
+	_, err := u.db.NewInsert().Model(user).Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
-
-	return ID, nil
+	return user.ID, nil
 }
 
-func (u *userRepo) GetUser(ID uint) (*User, error) {
-	query := "SELECT * FROM users WHERE id = ?"
-	row := u.db.QueryRow(query, ID)
-
-	user := &User{}
-	err := row.Scan(&user.ID)
+func (u *userRepo) GetUser(ctx context.Context, ID uint) (*User, error) {
+	user := new(User)
+	err := u.db.NewSelect().Model(user).Where("id = ?", ID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	return user, nil
+}
+
+func (u *userRepo) UpdateUser(ctx context.Context, user *User) error {
+	user.UpdatedAt = new(time.Time)
+	*user.UpdatedAt = time.Now()
+
+	_, err := u.db.NewUpdate().Model(user).Where("id = ?", user.ID).Exec(ctx)
+	return err
+}
+
+func (u *userRepo) DeleteUser(ctx context.Context, ID uint) error {
+	_, err := u.db.NewDelete().Model((*User)(nil)).Where("id = ?", ID).Exec(ctx)
+	return err
+}
+
+func (u *userRepo) ListUsers(ctx context.Context) ([]*User, error) {
+	var users []*User
+	err := u.db.NewSelect().Model(&users).Scan(ctx)
+	return users, err
 }

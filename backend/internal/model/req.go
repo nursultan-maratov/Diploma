@@ -9,3 +9,7 @@ type UserRequest struct {
 	Address   string `json:"address"`
 	Status    string `json:"status"`
 }
+
+type GetUser struct {
+	ID uint `json:"id"`
+}
