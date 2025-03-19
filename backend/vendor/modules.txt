@@ -4,11 +4,13 @@ github.com/golang-jwt/jwt/v5
 # github.com/jinzhu/inflection v1.0.0
 ## explicit
 github.com/jinzhu/inflection
-# github.com/labstack/echo/v4 v4.12.0
-## explicit; go 1.18
+# github.com/labstack/echo/v4 v4.13.3
+## explicit; go 1.20
 github.com/labstack/echo/v4
+github.com/labstack/echo/v4/middleware
 # github.com/labstack/gommon v0.4.2
 ## explicit; go 1.18
+github.com/labstack/gommon/bytes
 github.com/labstack/gommon/color
 github.com/labstack/gommon/log
 # github.com/lib/pq v1.10.9
@@ -81,7 +83,7 @@ golang.org/x/crypto/acme/autocert
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
-# golang.org/x/net v0.24.0
+# golang.org/x/net v0.33.0
 ## explicit; go 1.18
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -99,6 +101,9 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# golang.org/x/time v0.8.0
+## explicit; go 1.18
+golang.org/x/time/rate
 # mellium.im/sasl v0.3.2
 ## explicit; go 1.20
 mellium.im/sasl

@@ -3,15 +3,12 @@ import "./ApiButtons.css";
 
 export default function ApiButtons() {
     const [response, setResponse] = useState("");
-    const playlistID = "2Bu59D3h2JWPPrsSiWqc7b";
-    const accessToken = "Bearer BQDJZFQQ_LcMMXDYihyBukw9nrUs2ksHPIm4SqdxcM-v5XZkPLi9d9WpA-KH1jp8yKo1JM8B9yE6eozY5eUGW70eyDfcco_Uj9gKsQuwWC64FVbaeqhOX9FJaPq3RDrFYch8vuAYhFo";
 
     const TracksRequest = async (method) => {
-        const url = `https://api.spotify.com/v1/playlists/${playlistID}/tracks`;
+        const url = `http://localhost:80/user/create`;
         let options = {
             method,
             headers: {
-                "Authorization": accessToken,
                 "Content-Type": "application/json"
             }
         };
@@ -36,19 +33,34 @@ export default function ApiButtons() {
             }
         }
 
-        if (method === "POST") {
-            const trackUri = prompt("Введите URI трека");
-            if (!trackUri) {
-                setResponse("Добавление отменено");
+        if (method === "POST") {const first_name = prompt("Введите имя:");
+            const last_name = prompt("Введите фамилию:");
+            const email = prompt("Введите email:");
+            const phone = prompt("Введите телефон:");
+            const address = prompt("Введите адрес:");
+            const status = prompt("Введите статус (например, active):");
+
+            if (!first_name || !last_name || !email || !phone || !address || !status) {
+                setResponse("Добавление отменено (не все поля заполнены)");
                 return;
             }
 
-            options.body = JSON.stringify({ uris: [trackUri] });
+            options.body = JSON.stringify({
+                first_name,
+                last_name,
+                email,
+                phone,
+                address,
+                status
+            });
+
 
             try {
                 const res = await fetch(url, options);
                 if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
-                setResponse("Трек успешно добавлен!");
+
+                const data = await res.json(); // получаем число-ответ
+                setResponse(`✅ Пользователь успешно добавлен! ID: ${data}`);
             } catch (error) {
                 setResponse(`Ошибка запроса: ${error.message}`);
             }
