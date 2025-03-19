@@ -90,11 +90,11 @@ export default function ApiButtons() {
     return (
         <div className="container">
             <div className="card">
-                <h1 className="title">API Запросы Spotify</h1>
+                <h1 className="title">API Запросы</h1>
                 <div className="button-group">
-                    <button onClick={() => TracksRequest("GET")} className="button get">GET (Треки плейлиста)</button>
-                    <button onClick={() => TracksRequest("POST")} className="button post">POST (Добавить трек)</button>
-                    <button onClick={() => TracksRequest("DELETE")} className="button delete">DELETE (Удалить трек)</button>
+                    <button onClick={() => TracksRequest("GET")} className="button get">GET</button>
+                    <button onClick={() => TracksRequest("POST")} className="button post">POST</button>
+                    <button onClick={() => TracksRequest("DELETE")} className="button delete">DELETE</button>
                 </div>
                 <pre className="response">{response || "Здесь будет ответ от сервера"}</pre>
             </div>
