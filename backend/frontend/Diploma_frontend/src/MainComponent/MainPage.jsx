@@ -28,7 +28,7 @@ export default function MainPage() {
         <div className={styles.storeContainer}>
             <div className={styles.header}>
                 <h1 className={styles.storeTitle}>Магазин Одежды</h1>
-                <button className={styles.registerButton} onClick={() => navigate("/login")}>Войти</button>
+                <button className={styles.registerButton} onClick={() => navigate("/auth")}>Войти</button>
             </div>
             <div className={styles.productGrid}>
             {products.map((product) => (

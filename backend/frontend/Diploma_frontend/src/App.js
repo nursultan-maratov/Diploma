@@ -8,7 +8,7 @@ export default function App() {
         <Router>
             <Routes>
                 <Route path="/store" element={<MainPage />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/auth" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
             </Routes>
         </Router>

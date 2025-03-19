@@ -6,28 +6,55 @@ export default function RegisterPage() {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
-        birthDate: "",
         email: "",
         password: "",
         confirmPassword: "",
     });
 
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (formData.password !== formData.confirmPassword) {
             setError("Пароли не совпадают!");
             return;
         }
-        console.log("Регистрация успешна!", formData);
+
+        setLoading(true);
         setError("");
-        // Здесь можно добавить запрос к серверу для регистрации
+
+        try {
+            const response = await fetch("http://localhost:80/user/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    email: formData.email,
+                    password: formData.password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Ошибка регистрации");
+            }
+
+            alert("Регистрация успешна! Перенаправление на страницу входа...");
+            navigate("/login");
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -48,14 +75,6 @@ export default function RegisterPage() {
                         name="lastName"
                         placeholder="Фамилия"
                         value={formData.lastName}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="date"
-                        name="birthDate"
-                        placeholder="Год рождения"
-                        value={formData.birthDate}
                         onChange={handleChange}
                         required
                     />
@@ -84,7 +103,9 @@ export default function RegisterPage() {
                         required
                     />
                     {error && <p className="error-message">{error}</p>}
-                    <button type="submit" className={styles.registerButton}>Зарегистрироваться</button>
+                    <button type="submit" className={styles.registerButton} disabled={loading}>
+                        {loading ? "Регистрация..." : "Зарегистрироваться"}
+                    </button>
                 </form>
                 <button className={styles.backButton} onClick={() => navigate("/login")}>
                     Назад
