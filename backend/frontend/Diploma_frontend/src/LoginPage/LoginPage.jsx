@@ -1,9 +1,11 @@
 import styles from "./LoginPage.module.css";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -31,7 +33,10 @@ export default function LoginPage() {
                     />
                     <button type="submit" className={styles.loginButton}>Войти</button>
                 </form>
-                <p className={styles.registerLink}>Регистрация</p>
+                <div className={styles.buttonContainer}>
+                    <button className={styles.registerLink} onClick={() => navigate("/register")}>Регистрация</button>
+                    <button className={styles.backButton} onClick={() => navigate("/store")}>Назад на главную</button>
+                </div>
             </div>
         </div>
     );
