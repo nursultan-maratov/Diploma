@@ -1,4 +1,4 @@
-.store-container {
+.storeContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -18,7 +18,7 @@
     position: relative;
 }
 
-.store-title {
+.storeTitle {
     font-size: 2rem;
     font-weight: bold;
     color: #374151;
@@ -27,7 +27,7 @@
     transform: translateX(-50%);
 }
 
-.register-button {
+.registerButton {
     background-color: #34d399;
     color: white;
     padding: 0.5rem 1rem;
@@ -38,11 +38,11 @@
     transition: background 0.2s ease-in-out;
 }
 
-.register-button:hover {
+.registerButton:hover {
     background-color: #059669;
 }
 
-.product-grid {
+.productGrid {
     display: flex;
     justify-content: center;
     gap: 1.5rem;
@@ -52,7 +52,7 @@
     padding: 1rem 0;
 }
 
-.product-card {
+.productCard {
     flex: 0 0 auto;
     width: 400px;
     text-align: center;
@@ -62,27 +62,26 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.product-image {
+.productImage {
     width: 200px;
     height: 200px;
-    object-fit: cover;
     border-radius: 8px;
     margin-bottom: 1rem;
 }
 
-.product-name {
+.productName {
     font-size: 1.5rem;
     font-weight: bold;
     color: #333;
 }
 
-.product-price {
+.productPrice {
     font-size: 1.2rem;
     color: #555;
     margin-bottom: 1rem;
 }
 
-.buy-button {
+.buyButton {
     background-color: #3b82f6;
     color: white;
     padding: 0.5rem 1rem;
@@ -93,6 +92,6 @@
     transition: background 0.2s ease-in-out;
 }
 
-.buy-button:hover {
+.buyButton:hover {
     background-color: #2563eb;
 }
