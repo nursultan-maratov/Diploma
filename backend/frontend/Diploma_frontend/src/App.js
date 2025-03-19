@@ -1,10 +1,10 @@
 import './App.css';
-import ApiButtons from "./Main_Component/ApiButtons";
+import MainPage from "./Main_Component/MainPage";
 
 function App() {
   return (
     <div className="App">
-      <ApiButtons />
+      <MainPage />
     </div>
   );
 }
