@@ -15,21 +15,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Kaput db is not working %v", err)
 	}
-	service := service.NewService(db)
+	factory := service.NewService(db)
 
 	if err != nil {
 		log.Fatalf("Kaput factory is not working %v", err)
 	}
 
-	newHandler := handler.NewHandler(service.GetUserManager())
+	newHandler := handler.NewHandler(factory.GetUserManager())
 
 	e := echo.New()
 	userGroup := e.Group("/user")
-	userGroup.POST("/create-user", newHandler.CreateUsers)
-	userGroup.POST("/get-user", newHandler.GetUser)
-	userGroup.POST("/create-update", newHandler.UpdateUser)
-	userGroup.POST("/create-user", newHandler.CreateUsers)
-	userGroup.POST("/create-user", newHandler.CreateUsers)
-
+	userGroup.POST("/create", newHandler.CreateUsers)
 	e.Logger.Fatal(e.Start(":80"))
 }

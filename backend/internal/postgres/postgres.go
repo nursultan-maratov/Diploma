@@ -3,28 +3,36 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 const (
 	host     = "localhost"
-	port     = 5051
+	port     = "5051"
 	user     = "postgres"
 	password = "password"
 	dbname   = "postgres"
 )
 
-func ConnectDefaultDataBase() (*sql.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
-	}
+func ConnectDefaultDataBase() (*bun.DB, error) {
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user,
+		password,
+		host,
+		port,
+		dbname,
+	)
 
-	err = db.Ping()
+	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
+	db := bun.NewDB(sqldb, pgdialect.New())
+
+	db.SetMaxOpenConns(90)
+
+	err := db.Ping()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return db, nil

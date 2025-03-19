@@ -1,8 +1,8 @@
 package service
 
 import (
-	"database/sql"
 	"github.com/nursultan-maratov/Diploma.git/internal/manager/user"
+	"github.com/uptrace/bun"
 )
 
 type Service struct {
@@ -15,7 +15,7 @@ type ServiceSDK interface {
 	GetRepository() Repository
 }
 
-func NewService(db *sql.DB) *Service {
+func NewService(db bun.IDB) *Service {
 	repository := NewRepository(db)
 
 	userManager := user.NewManager(repository.GetUserRepo())

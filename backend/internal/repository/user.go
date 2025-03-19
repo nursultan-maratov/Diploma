@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/uptrace/bun"
 	"time"
 )
@@ -21,18 +22,14 @@ type User struct {
 }
 
 type userRepo struct {
-	db *bun.DB
+	db bun.IDB
 }
 
 type UserSDK interface {
 	CreateUser(ctx context.Context, user *User) (uint, error)
-	GetUser(ctx context.Context, ID uint) (*User, error)
-	UpdateUser(ctx context.Context, user *User) error
-	DeleteUser(ctx context.Context, ID uint) error
-	ListUsers(ctx context.Context) ([]*User, error)
 }
 
-func NewUserRepo(db *bun.DB) UserSDK {
+func NewUserRepo(db bun.IDB) UserSDK {
 	return &userRepo{db: db}
 }
 
@@ -40,37 +37,17 @@ func (u *userRepo) CreateUser(ctx context.Context, user *User) (uint, error) {
 	now := time.Now()
 	user.CreatedAt = &now
 
-	_, err := u.db.NewInsert().Model(user).Exec(ctx)
+	query := fmt.Sprintf(
+		`INSERT INTO users (first_name, last_name, email, password, phone, address, status, created_at)
+		 VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id`,
+		user.FirstName, user.LastName, user.Email, user.Password, user.Phone, user.Address, user.Status, user.CreatedAt.Format(time.RFC3339),
+	)
+
+	var id uint
+	err := u.db.QueryRowContext(ctx, query).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	return user.ID, nil
-}
 
-func (u *userRepo) GetUser(ctx context.Context, ID uint) (*User, error) {
-	user := new(User)
-	err := u.db.NewSelect().Model(user).Where("id = ?", ID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (u *userRepo) UpdateUser(ctx context.Context, user *User) error {
-	user.UpdatedAt = new(time.Time)
-	*user.UpdatedAt = time.Now()
-
-	_, err := u.db.NewUpdate().Model(user).Where("id = ?", user.ID).Exec(ctx)
-	return err
-}
-
-func (u *userRepo) DeleteUser(ctx context.Context, ID uint) error {
-	_, err := u.db.NewDelete().Model((*User)(nil)).Where("id = ?", ID).Exec(ctx)
-	return err
-}
-
-func (u *userRepo) ListUsers(ctx context.Context) ([]*User, error) {
-	var users []*User
-	err := u.db.NewSelect().Model(&users).Scan(ctx)
-	return users, err
+	return id, nil
 }
