@@ -49,7 +49,7 @@ export default function RegisterPage() {
             }
 
             alert("Регистрация успешна! Перенаправление на страницу входа...");
-            navigate("/login");
+            navigate("/auth");
         } catch (err) {
             setError(err.message);
         } finally {
@@ -107,7 +107,7 @@ export default function RegisterPage() {
                         {loading ? "Регистрация..." : "Зарегистрироваться"}
                     </button>
                 </form>
-                <button className={styles.backButton} onClick={() => navigate("/login")}>
+                <button className={styles.backButton} onClick={() => navigate("/auth")}>
                     Назад
                 </button>
             </div>
