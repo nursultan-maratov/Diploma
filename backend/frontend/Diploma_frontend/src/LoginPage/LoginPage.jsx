@@ -1,15 +1,40 @@
 import styles from "./LoginPage.module.css";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useState} from "react";
+import {useNavigate} from "react-router-dom";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Email:", email, "Password:", password);
+        setLoading(true);
+        setError("");
+
+        try {
+            const response = await fetch("http://localhost:80/auth", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password}),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Ошибка авторизации");
+            }
+
+            localStorage.setItem("token", data.token);
+            alert("Вы успешно вошли!");
+            navigate("/store");
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -24,14 +49,17 @@ export default function LoginPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <label>Password</label>
+                    <label>Пароль</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button type="submit" className={styles.loginButton}>Войти</button>
+                    {error && <p className="error-message">{error}</p>}
+                    <button type="submit" className={styles.loginButton} disabled={loading}>
+                        {loading ? "Вход..." : "Войти"}
+                    </button>
                 </form>
                 <div className={styles.buttonContainer}>
                     <button className={styles.registerLink} onClick={() => navigate("/register")}>Регистрация</button>
