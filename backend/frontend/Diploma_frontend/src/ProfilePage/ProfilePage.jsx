@@ -6,14 +6,20 @@ const ProfilePage = () => {
     const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
-        // Запрос данных пользователя
-        fetch("http://localhost:80/user-info?user_id=0")
-            .then(response => response.json())
-            .then(data => setUserData(data))
-            .catch(error => console.error("Ошибка загрузки данных пользователя:", error));
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Вы не авторизованы!");
+            window.location.href = "/login";
+            return;
+        }
 
         // Запрос корзины покупок
-        fetch("http://localhost:80/list-order?user_id=0")
+        fetch("http://localhost:80/list-order", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
             .then(response => response.json())
             .then(data => setCartItems(data))
             .catch(error => console.error("Ошибка загрузки корзины:", error));
