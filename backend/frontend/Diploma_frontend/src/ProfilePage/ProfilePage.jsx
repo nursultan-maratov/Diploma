@@ -1,65 +1,44 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import styles from "./ProfilePage.module.css";
+import React, { useEffect, useState } from "react";
+import styles from"./ProfilePage.module.css";
 
-export default function ProfilePage() {
-    const [user, setUser] = useState(null);
-    const [cart, setCart] = useState([]);
-    const navigate = useNavigate();
+const ProfilePage = () => {
+    const [userData, setUserData] = useState(null);
+    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
-        fetchUserData();
-        fetchCart();
+        // Запрос данных пользователя
+        fetch("http://localhost:80/user-info?user_id=0")
+            .then(response => response.json())
+            .then(data => setUserData(data))
+            .catch(error => console.error("Ошибка загрузки данных пользователя:", error));
+
+        // Запрос корзины покупок
+        fetch("http://localhost:80/list-order?user_id=0")
+            .then(response => response.json())
+            .then(data => setCartItems(data))
+            .catch(error => console.error("Ошибка загрузки корзины:", error));
     }, []);
-
-    const fetchUserData = async () => {
-        try {
-            const response = await fetch("http://localhost:80/user-info");
-            if (!response.ok) {
-                throw new Error("Ошибка загрузки данных пользователя");
-            }
-            const data = await response.json();
-            setUser(data);
-        } catch (error) {
-            console.error("Ошибка:", error);
-        }
-    };
-
-    const fetchCart = async () => {
-        try {
-            const response = await fetch("http://localhost:80/user-cart");
-            if (!response.ok) {
-                throw new Error("Ошибка загрузки корзины");
-            }
-            const data = await response.json();
-            setCart(data);
-        } catch (error) {
-            console.error("Ошибка:", error);
-        }
-    };
 
     return (
         <div className={styles.profileContainer}>
-            <h1>Профиль</h1>
+            <h1>Профиль пользователя</h1>
 
-            {user ? (
+            {userData && (
                 <div className={styles.userInfo}>
-                    <p><strong>Имя:</strong> {user.name}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
+                    <p><strong>Имя:</strong> {userData.name}</p>
+                    <p><strong>Email:</strong> {userData.email}</p>
+                    <p><strong>Дата регистрации:</strong> {new Date(userData.created_at).toLocaleDateString()}</p>
                 </div>
-            ) : (
-                <p>Загрузка данных пользователя...</p>
             )}
 
             <h2>Корзина покупок</h2>
             <div className={styles.cartGrid}>
-                {cart.length > 0 ? (
-                    cart.map((product) => (
-                        <div key={product.id} className={styles.productCard}>
-                            <img src={product.image || "default_image.jpg"} alt={product.name} className={styles.productImage} />
-                            <h3>{product.name}</h3>
-                            <p>{product.description}</p>
-                            <p><strong>Цена:</strong> {product.price} ₸</p>
+                {cartItems.length > 0 ? (
+                    cartItems.map(item => (
+                        <div key={item.id} className={styles.productCard}>
+                            <img src={item.img} alt={item.description} className={styles.productImage} />
+                            <h3>Товар #{item.product_id}</h3>
+                            <p>{item.description}</p>
                         </div>
                     ))
                 ) : (
@@ -67,9 +46,11 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            <button onClick={() => navigate("/store")} className={styles.backButton}>
-                Вернуться в магазин
+            <button className={styles.backButton} onClick={() => window.location.href = "/"}>
+                Вернуться на главную
             </button>
         </div>
     );
-}
+};
+
+export default ProfilePage;
