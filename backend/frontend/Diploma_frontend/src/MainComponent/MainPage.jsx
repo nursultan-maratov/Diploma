@@ -30,14 +30,21 @@ export default function MainPage() {
 
     const handleBuy = async (productId) => {
         try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Вы не авторизованы!");
+                return;
+            }
+
             const response = await fetch("http://localhost:80/buy-product", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     product_id: productId,
-                    user_id: 0, // user_id всегда равен 0
+                    user_id: 0,
                 }),
             });
 
