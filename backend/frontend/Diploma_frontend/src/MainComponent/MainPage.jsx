@@ -12,7 +12,6 @@ export default function MainPage() {
         if (token) {
             setIsAuthenticated(true);
         }
-
         fetchProducts();
     }, []);
 
@@ -26,6 +25,30 @@ export default function MainPage() {
             setProducts(data);
         } catch (error) {
             console.error("Ошибка:", error);
+        }
+    };
+
+    const handleBuy = async (productId) => {
+        try {
+            const response = await fetch("http://localhost:80/buy-product", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    user_id: 0, // user_id всегда равен 0
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Ошибка при покупке товара");
+            }
+
+            alert("Товар успешно куплен!");
+        } catch (error) {
+            console.error("Ошибка покупки:", error);
+            alert("Не удалось купить товар.");
         }
     };
 
@@ -48,12 +71,14 @@ export default function MainPage() {
                     products.map((product) => (
                         <div key={product.id} className={styles.productCard}>
                             <div className={styles.product_image_container}>
-                                <img src={product.img || "default_image.jpg"} alt={product.name} className={styles.productImage} />
+                                <img src={product.image || "default_image.jpg"} alt={product.name} className={styles.productImage} />
                             </div>
                             <h2 className={styles.productName}>{product.name}</h2>
                             <p className={styles.productDescription}>{product.description}</p>
                             <p className={styles.productPrice}>{product.price} ₸</p>
-                            <button className={styles.buyButton}>Купить</button>
+                            <button className={styles.buyButton} onClick={() => handleBuy(product.id)}>
+                                Купить
+                            </button>
                         </div>
                     ))
                 ) : (
