@@ -8,42 +8,39 @@ import (
 	"github.com/uptrace/bun"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type Middleware struct {
-	user   repository.UserSDK
-	secret string
+	userRepo repository.UserSDK
+	secret   string
 }
 
 func NewMiddleware(db bun.IDB, secret string) *Middleware {
 	return &Middleware{
-		user:   repository.NewUserRepo(db),
-		secret: secret,
+		userRepo: repository.NewUserRepo(db),
+		secret:   secret,
 	}
 }
 
 func (m *Middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-		if tokenString == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized, "missing or invalid token")
+		if authHeader == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized, "missing token")
 		}
 
-		claims, err := m.ValidateToken(tokenString)
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			return echo.NewHTTPError(http.StatusUnauthorized, "invalid authorization header format")
+		}
+
+		tokenString := parts[1]
+		userID, err := m.validateToken(tokenString)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
+			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
-		userIDFloat, ok := claims["user_id"].(float64) // JWT хранит числа как float64
-		if !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, "invalid user_id in token")
-		}
-		userID := uint(userIDFloat) // Приводим к uint
-
-		userInfo, err := m.user.GetUser(c.Request().Context(), userID)
+		userInfo, err := m.userRepo.GetUserByID(c.Request().Context(), userID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, "user not found")
 		}
@@ -55,32 +52,27 @@ func (m *Middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (m *Middleware) ValidateToken(tokenString string) (jwt.MapClaims, error) {
+func (m *Middleware) validateToken(tokenString string) (uint, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if token.Method != jwt.SigningMethodHS256 {
 			return nil, errors.New("unexpected signing method")
 		}
 		return []byte(m.secret), nil
 	})
 
 	if err != nil || !token.Valid {
-		return nil, errors.New("invalid token")
+		return 0, errors.New("invalid token")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("invalid claims")
+		return 0, errors.New("invalid claims")
 	}
 
-	return claims, nil
-}
-
-func (m *Middleware) GenerateToken(userID uint) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		return 0, errors.New("invalid user_id in token")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(m.secret))
+	return uint(userIDFloat), nil
 }

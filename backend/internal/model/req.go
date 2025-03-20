@@ -5,10 +5,19 @@ type UserRequest struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
-	Address   string `json:"address"`
-	Status    string `json:"status"`
+	Password  string `json:"password"`
 }
 
 type GetUser struct {
 	ID uint `json:"id"`
+}
+
+type Auth struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type BuyProduct struct {
+	ProductID int  `json:"product_id"`
+	UserID    uint `json:"user_id"`
 }

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"github.com/nursultan-maratov/Diploma.git/internal/security"
 	"github.com/uptrace/bun"
 	"time"
 )
@@ -13,9 +13,6 @@ type User struct {
 	LastName  string     `json:"last_name"`
 	Email     string     `json:"email" bun:",unique"`
 	Password  string     `json:"password"`
-	Phone     string     `json:"phone"`
-	Address   string     `json:"address"`
-	Status    string     `json:"status"`
 	CreatedAt *time.Time `json:"created_at" bun:",nullzero,default:current_timestamp"`
 	UpdatedAt *time.Time `json:"updated_at" bun:",nullzero"`
 	DeletedAt *time.Time `json:"deleted_at" bun:",soft_delete,nullzero"`
@@ -27,6 +24,8 @@ type userRepo struct {
 
 type UserSDK interface {
 	CreateUser(ctx context.Context, user *User) (uint, error)
+	GetUserByID(ctx context.Context, id uint) (*User, error)
+	Auth(ctx context.Context, email, password string) (bool, uint, error)
 }
 
 func NewUserRepo(db bun.IDB) UserSDK {
@@ -34,20 +33,39 @@ func NewUserRepo(db bun.IDB) UserSDK {
 }
 
 func (u *userRepo) CreateUser(ctx context.Context, user *User) (uint, error) {
-	now := time.Now()
-	user.CreatedAt = &now
+	timeNow := time.Now()
+	user.CreatedAt = &timeNow
 
-	query := fmt.Sprintf(
-		`INSERT INTO users (first_name, last_name, email, password, phone, address, status, created_at)
-		 VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id`,
-		user.FirstName, user.LastName, user.Email, user.Password, user.Phone, user.Address, user.Status, user.CreatedAt.Format(time.RFC3339),
-	)
+	_, err := u.db.NewInsert().Model(user).Exec(ctx)
+	return user.ID, err
+}
 
-	var id uint
-	err := u.db.QueryRowContext(ctx, query).Scan(&id)
+func (u *userRepo) GetUserByID(ctx context.Context, id uint) (*User, error) {
+	var user User
+
+	err := u.db.NewSelect().
+		Model(&user).
+		Where("id = ?", id).
+		Scan(ctx)
+
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return id, nil
+	return &user, nil
+}
+
+func (u *userRepo) Auth(ctx context.Context, email, password string) (bool, uint, error) {
+	var user User
+
+	err := u.db.NewSelect().
+		Model(&user).
+		Where("email = ?", email).
+		Scan(ctx)
+	if err != nil {
+		return false, 0, err
+	}
+	isHash := security.CheckPasswordHash(password, user.Password)
+
+	return isHash, user.ID, nil
 }

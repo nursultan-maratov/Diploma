@@ -4,12 +4,14 @@ import (
 	"context"
 	"github.com/nursultan-maratov/Diploma.git/internal/model"
 	"github.com/nursultan-maratov/Diploma.git/internal/repository"
+	"github.com/nursultan-maratov/Diploma.git/internal/security"
 	"log"
 	"time"
 )
 
 type ManagerSDK interface {
-	CreateUser(ctx context.Context, user *model.UserRequest) (uint, error)
+	CreateUser(ctx context.Context, req *model.UserRequest) (uint, error)
+	Auth(ctx context.Context, req *model.Auth) (bool, uint, error)
 }
 
 type manager struct {
@@ -23,15 +25,18 @@ func NewManager(user repository.UserSDK) ManagerSDK {
 }
 
 func (m *manager) CreateUser(ctx context.Context, user *model.UserRequest) (uint, error) {
+	hashedPassword, err := security.HashPassword(user.Password)
+	if err != nil {
+		log.Println("Ошибка при хешировании пароля:", err)
+		return 0, err
+	}
 
 	timeNow := time.Now()
 	userRepo := &repository.User{
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
-		Phone:     user.Phone,
-		Address:   user.Address,
-		Status:    user.Status,
+		Password:  hashedPassword,
 		CreatedAt: &timeNow,
 	}
 
@@ -42,4 +47,13 @@ func (m *manager) CreateUser(ctx context.Context, user *model.UserRequest) (uint
 	}
 
 	return id, nil
+}
+
+func (m *manager) Auth(ctx context.Context, req *model.Auth) (bool, uint, error) {
+	isHash, id, err := m.user.Auth(ctx, req.Email, req.Password)
+	if err != nil {
+		return false, 0, err
+	}
+
+	return isHash, id, nil
 }

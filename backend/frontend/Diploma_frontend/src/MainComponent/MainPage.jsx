@@ -48,7 +48,7 @@ export default function MainPage() {
                     products.map((product) => (
                         <div key={product.id} className={styles.productCard}>
                             <div className={styles.product_image_container}>
-                                <img src={product.image || "default_image.jpg"} alt={product.name} className={styles.productImage} />
+                                <img src={product.img || "default_image.jpg"} alt={product.name} className={styles.productImage} />
                             </div>
                             <h2 className={styles.productName}>{product.name}</h2>
                             <p className={styles.productDescription}>{product.description}</p>
