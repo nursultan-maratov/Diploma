@@ -11,11 +11,11 @@ type Repository struct {
 	productRepo repository.ProductSDK
 }
 
-func NewRepository(db bun.IDB) *Repository {
+func NewRepository(secureDB bun.IDB, unsafeDB bun.IDB) *Repository {
 	return &Repository{
-		userRepo:    repository.NewUserRepo(db),
-		orderRepo:   repository.NewOrderRepo(db),
-		productRepo: repository.NewProductRepo(db),
+		userRepo:    repository.NewUserRepo(secureDB, unsafeDB),
+		orderRepo:   repository.NewOrderRepo(secureDB),
+		productRepo: repository.NewProductRepo(secureDB),
 	}
 }
 

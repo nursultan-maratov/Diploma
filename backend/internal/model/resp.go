@@ -23,3 +23,10 @@ type ProductResp struct {
 	DeletedAt     *time.Time `json:"deleted_at"`
 	Img           string     `json:"img"`
 }
+
+type GetUserResp struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email" bun:",unique"`
+	Password  string `json:"password"`
+}

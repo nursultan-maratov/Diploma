@@ -15,9 +15,9 @@ type Middleware struct {
 	secret   string
 }
 
-func NewMiddleware(db bun.IDB, secret string) *Middleware {
+func NewMiddleware(secureDB bun.IDB, unsafe bun.IDB, secret string) *Middleware {
 	return &Middleware{
-		userRepo: repository.NewUserRepo(db),
+		userRepo: repository.NewUserRepo(secureDB, unsafe),
 		secret:   secret,
 	}
 }

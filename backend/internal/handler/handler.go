@@ -6,7 +6,6 @@ import (
 	"github.com/nursultan-maratov/Diploma.git/internal/manager/order"
 	"github.com/nursultan-maratov/Diploma.git/internal/manager/user"
 	"github.com/nursultan-maratov/Diploma.git/internal/model"
-	"log"
 	"time"
 
 	"net/http"
@@ -29,7 +28,6 @@ func NewHandler(userManager user.ManagerSDK, productManager order.ManagerSDK, se
 func (h *Handler) CreateUsers(c echo.Context) error {
 	var req *model.UserRequest
 	err := c.Bind(&req)
-	log.Println(err)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
@@ -117,6 +115,21 @@ func (h *Handler) ListProduct(c echo.Context) error {
 	if resp == nil {
 		return c.JSON(http.StatusOK, "Список пуст")
 
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) GetUser(c echo.Context) error {
+	var req *model.GetUserRequest
+	err := c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "bad request")
+	}
+
+	resp, err := h.userManager.GetUser(c.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, resp)

@@ -18,8 +18,8 @@ type ServiceSDK interface {
 	GetRepository() Repository
 }
 
-func NewService(db bun.IDB) *Service {
-	repository := NewRepository(db)
+func NewService(secureDB bun.IDB, unsafe bun.IDB) *Service {
+	repository := NewRepository(secureDB, unsafe)
 
 	userManager := user.NewManager(repository.GetUserRepo())
 	orderManager := order.NewManager(repository.GetOrderRepo(), repository.GetProductRepo())

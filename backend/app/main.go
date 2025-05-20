@@ -13,13 +13,19 @@ import (
 
 func main() {
 
-	db, err := postgres.ConnectDefaultDataBase()
+	secureDB, err := postgres.ConnectSecureDB()
 	if err != nil {
 		log.Fatalf("Kaput db is not working %v", err)
 	}
-	newMiddleware := middleware.NewMiddleware(db, "salt")
 
-	factory := service.NewService(db)
+	unsafeDB, err := postgres.ConnectUnsafeDB()
+	if err != nil {
+		log.Fatalf("Kaput db is not working %v", err)
+	}
+
+	newMiddleware := middleware.NewMiddleware(secureDB, unsafeDB, "salt")
+
+	factory := service.NewService(secureDB, unsafeDB)
 
 	if err != nil {
 		log.Fatalf("Kaput factory is not working %v", err)
@@ -37,6 +43,7 @@ func main() {
 
 	userGroup := e.Group("/user")
 	userGroup.POST("/create", newHandler.CreateUsers)
+	userGroup.POST("/get", newHandler.GetUser, newMiddleware.Auth)
 
 	e.POST("/auth", newHandler.Auth)
 

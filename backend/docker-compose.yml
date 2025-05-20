@@ -1,22 +1,7 @@
 version: '3.9'
 
 services:
-
-  default_database:
-    image: postgres
-    ports:
-      - "5051:5432"
-    shm_size: 128mb
-    volumes:
-      - type: tmpfs
-        target: /dev/shm
-      - ./internal/postgres/sql:/docker-entrypoint-initdb.d
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_NAME: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_HOST: localhost
-  security_database:
+  unsafe_database:
     image: postgres
     ports:
       - "5050:5432"
@@ -24,6 +9,7 @@ services:
     volumes:
       - type: tmpfs
         target: /dev/shm
+      - ./internal/postgres/sql:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: postgres
       POSTGRES_NAME: postgres

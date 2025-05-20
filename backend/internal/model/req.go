@@ -21,3 +21,7 @@ type BuyProduct struct {
 	ProductID int  `json:"product_id"`
 	UserID    uint `json:"user_id"`
 }
+
+type GetUserRequest struct {
+	Email string `json:"email"`
+}
